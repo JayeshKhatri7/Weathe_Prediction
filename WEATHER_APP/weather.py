@@ -98,8 +98,7 @@ def main():
             prediction = w.predict([input_list])[0]
             diagnosis = f"✅ Weather prediction result: {prediction}"
 
-        except ValueError:
-            diagnosis = "❌ Please enter valid numerical values in all fields."
+       
 
         st.success(diagnosis)
 
