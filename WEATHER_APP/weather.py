@@ -9,43 +9,95 @@ import pickle
 import streamlit as st
 from streamlit_option_menu import option_menu
 
-# Load model
-w = pickle.load(open(r'WEATHER_APP/weather(logistic).sav', 'rb'))
+# Load trained model
+w = pickle.load(open(r'C:\internship\sav\weather(logistic).sav', 'rb'))
 
 def main():
-    st.title("Weather Data Prediction App")
+    st.title("🌤️ Weather Data Prediction App")
 
     # Numeric inputs
-    temperature = st.text_input("Temperature (°C)")
-    humidity = st.text_input("Humidity (%)")
-    wind_speed = st.text_input("Wind Speed (km/h)")
-    precipitation = st.text_input("Precipitation (%)")
-    pressure = st.text_input("Atmospheric Pressure (hPa)")
-    uv_index = st.text_input("UV Index")
-    visibility = st.text_input("Visibility (km)")
+    temperature = st.text_input("Temperature (°C)").strip()
+    humidity = st.text_input("Humidity (%)").strip()
+    wind_speed = st.text_input("Wind Speed (km/h)").strip()
+    precipitation = st.text_input("Precipitation (%)").strip()
+    pressure = st.text_input("Atmospheric Pressure (hPa)").strip()
+    uv_index = st.text_input("UV Index").strip()
+    visibility = st.text_input("Visibility (km)").strip()
 
-    # Categorical inputs
+    # Categorical dropdowns
     cloud_cover = st.selectbox("Cloud Cover", ['overcast', 'partly cloudy', 'clear', 'cloudy'])
     season = st.selectbox("Season", ['Winter', 'Spring', 'Autumn', 'Summer'])
     location = st.selectbox("Location", ['inland', 'mountain', 'coastal'])
     weather_type = st.selectbox("Weather Type", ['Rainy', 'Sunny', 'Cloudy', 'Snowy'])
 
-    # Convert to numeric
-    location_val = 0 if location == 'inland' else 1 if location == 'mountain' else 2
-    weather_type_val = {'Rainy': 0, 'Sunny': 1, 'Cloudy': 2, 'Snowy': 3}[weather_type]
-    cloud_cover_val = {'overcast': 0, 'partly cloudy': 1, 'clear': 2, 'cloudy': 3}[cloud_cover]
-    season_val = {'Winter': 0, 'Spring': 1, 'Autumn': 2, 'Summer': 3}[season]
+    # Convert to integer values
+    if location == 'inland':
+        location_val = 0
+    elif location == 'mountain':
+        location_val = 1
+    else:
+        location_val = 2
+
+    if weather_type == 'Rainy':
+        weather_type_val = 0
+    elif weather_type == 'Sunny':
+        weather_type_val = 1
+    elif weather_type == 'Cloudy':
+        weather_type_val = 2
+    else:
+        weather_type_val = 3
+
+    if cloud_cover == 'overcast':
+        cloud_cover_val = 0
+    elif cloud_cover == 'partly cloudy':
+        cloud_cover_val = 1
+    elif cloud_cover == 'clear':
+        cloud_cover_val = 2
+    else:
+        cloud_cover_val = 3
+
+    if season == 'Winter':
+        season_val = 0
+    elif season == 'Spring':
+        season_val = 1
+    elif season == 'Autumn':
+        season_val = 2
+    else:
+        season_val = 3
+
+    # Cast categorical to int explicitly
+    location_val = int(location_val)
+    weather_type_val = int(weather_type_val)
+    cloud_cover_val = int(cloud_cover_val)
+    season_val = int(season_val)
 
     diagnosis = ""
+
     if st.button("Get Weather Prediction"):
         try:
+            # Check for empty fields
+            if "" in [temperature, humidity, wind_speed, precipitation, pressure, uv_index, visibility]:
+                raise ValueError("Missing input values")
+
+            # Convert inputs to float
             input_list = [
-                float(temperature), float(humidity), float(wind_speed), float(precipitation),
-                float(pressure), float(uv_index), float(visibility),
-                season_val, location_val, weather_type_val, cloud_cover_val
+                float(temperature),
+                float(humidity),
+                float(wind_speed),
+                float(precipitation),
+                float(pressure),
+                float(uv_index),
+                float(visibility),
+                season_val,
+                location_val,
+                weather_type_val,
+                cloud_cover_val
             ]
+
+            # Predict using model
             prediction = w.predict([input_list])[0]
-            diagnosis = f"✅ Weather prediction: {prediction}"
+            diagnosis = f"✅ Weather prediction result: {prediction}"
+
         except ValueError:
             diagnosis = "❌ Please enter valid numerical values in all fields."
 
