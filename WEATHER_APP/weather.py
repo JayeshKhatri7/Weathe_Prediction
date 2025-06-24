@@ -29,13 +29,21 @@ def main():
     cloud_cover_val = {'overcast': 0, 'partly cloudy': 1, 'clear': 2, 'cloudy': 3}[cloud_cover]
     season_val = {'Winter': 0, 'Spring': 1, 'Autumn': 2, 'Summer': 3}[season]
 
+    # Prediction button logic
     if st.button("Get Weather Prediction"):
         try:
-            # Validate all inputs are not empty and are numeric
-            float_fields = [temperature, humidity, wind_speed, precipitation, pressure, uv_index, visibility]
-            float_inputs = [float(value.strip()) for value in float_fields]  # may raise ValueError if invalid
+            # Convert input fields to float
+            float_inputs = [
+                float(temperature),
+                float(humidity),
+                float(wind_speed),
+                float(precipitation),
+                float(pressure),
+                float(uv_index),
+                float(visibility)
+            ]
 
-            # Add categorical values
+            # Create final input list for prediction
             input_list = float_inputs + [
                 int(season_val),
                 int(location_val),
@@ -43,13 +51,18 @@ def main():
                 int(cloud_cover_val)
             ]
 
+            # Debug: show model input
+            st.write("🔍 Input to model:", input_list)
+
+            # Predict using model
             prediction = w.predict([input_list])[0]
             diagnosis = f"✅ Weather prediction result: {prediction}"
 
-        except ValueError:
-            diagnosis = "❌ Please enter valid numerical values in all fields."
+        except Exception as e:
+            diagnosis = f"❌ Error: {e}"
 
         st.success(diagnosis)
 
+# Run the app
 if __name__ == "__main__":
     main()
