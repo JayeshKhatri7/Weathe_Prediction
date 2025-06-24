@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jun 24 10:23:19 2025
-
-@author: jayes
-"""
-
 import pickle
 import streamlit as st
 from streamlit_option_menu import option_menu
@@ -31,74 +24,30 @@ def main():
     weather_type = st.selectbox("Weather Type", ['Rainy', 'Sunny', 'Cloudy', 'Snowy'])
 
     # Convert to integer values
-    if location == 'inland':
-        location_val = 0
-    elif location == 'mountain':
-        location_val = 1
-    else:
-        location_val = 2
-
-    if weather_type == 'Rainy':
-        weather_type_val = 0
-    elif weather_type == 'Sunny':
-        weather_type_val = 1
-    elif weather_type == 'Cloudy':
-        weather_type_val = 2
-    else:
-        weather_type_val = 3
-
-    if cloud_cover == 'overcast':
-        cloud_cover_val = 0
-    elif cloud_cover == 'partly cloudy':
-        cloud_cover_val = 1
-    elif cloud_cover == 'clear':
-        cloud_cover_val = 2
-    else:
-        cloud_cover_val = 3
-
-    if season == 'Winter':
-        season_val = 0
-    elif season == 'Spring':
-        season_val = 1
-    elif season == 'Autumn':
-        season_val = 2
-    else:
-        season_val = 3
-
-    # Cast categorical to int explicitly
-    location_val = int(location_val)
-    weather_type_val = int(weather_type_val)
-    cloud_cover_val = int(cloud_cover_val)
-    season_val = int(season_val)
-
-    diagnosis = ""
+    location_val = 0 if location == 'inland' else 1 if location == 'mountain' else 2
+    weather_type_val = {'Rainy': 0, 'Sunny': 1, 'Cloudy': 2, 'Snowy': 3}[weather_type]
+    cloud_cover_val = {'overcast': 0, 'partly cloudy': 1, 'clear': 2, 'cloudy': 3}[cloud_cover]
+    season_val = {'Winter': 0, 'Spring': 1, 'Autumn': 2, 'Summer': 3}[season]
 
     if st.button("Get Weather Prediction"):
         try:
-            # Check for empty fields
-            if "" in [temperature, humidity, wind_speed, precipitation, pressure, uv_index, visibility]:
-                raise ValueError("Missing input values")
+            # Validate all inputs are not empty and are numeric
+            float_fields = [temperature, humidity, wind_speed, precipitation, pressure, uv_index, visibility]
+            float_inputs = [float(value.strip()) for value in float_fields]  # may raise ValueError if invalid
 
-            # Convert inputs to float
-            input_list = [
-                float(temperature),
-                float(humidity),
-                float(wind_speed),
-                float(precipitation),
-                float(pressure),
-                float(uv_index),
-                float(visibility),
-                season_val,
-                location_val,
-                weather_type_val,
-                cloud_cover_val
+            # Add categorical values
+            input_list = float_inputs + [
+                int(season_val),
+                int(location_val),
+                int(weather_type_val),
+                int(cloud_cover_val)
             ]
 
-            # Predict using model
             prediction = w.predict([input_list])[0]
             diagnosis = f"✅ Weather prediction result: {prediction}"
 
-       
+        except ValueError:
+            diagnosis = "❌ Please enter valid numerical values in all fields."
 
         st.success(diagnosis)
 
