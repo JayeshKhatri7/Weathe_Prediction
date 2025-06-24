@@ -8,7 +8,7 @@ w = pickle.load(open(r'WEATHER_APP/weather(logistic).sav', 'rb'))
 def main():
     st.title("🌤️ Weather Data Prediction App")
 
-    # Numeric inputs
+    # Numeric inputs (text fields for all values including former dropdowns)
     temperature = st.text_input("Temperature (°C)").strip()
     humidity = st.text_input("Humidity (%)").strip()
     wind_speed = st.text_input("Wind Speed (km/h)").strip()
@@ -17,52 +17,32 @@ def main():
     uv_index = st.text_input("UV Index").strip()
     visibility = st.text_input("Visibility (km)").strip()
 
-    # Categorical dropdowns
-    cloud_cover = st.selectbox("Cloud Cover", ['overcast', 'partly cloudy', 'clear', 'cloudy'])
-    season = st.selectbox("Season", ['Winter', 'Spring', 'Autumn', 'Summer'])
-    location = st.selectbox("Location", ['inland', 'mountain', 'coastal'])
-    weather_type = st.selectbox("Weather Type", ['Rainy', 'Sunny', 'Cloudy', 'Snowy'])
+    # Previously dropdowns — now numeric fields
+    cloud_cover_val = st.text_input("Cloud Cover (0=overcast, 1=partly cloudy, 2=clear, 3=cloudy)").strip()
+    season_val = st.text_input("Season (0=Winter, 1=Spring, 2=Autumn, 3=Summer)").strip()
+    location_val = st.text_input("Location (0=inland, 1=mountain, 2=coastal)").strip()
+    weather_type_val = st.text_input("Weather Type (0=Rainy, 1=Sunny, 2=Cloudy, 3=Snowy)").strip()
 
-    # Convert to integer values
-    location_val = 0 if location == 'inland' else 1 if location == 'mountain' else 2
-    weather_type_val = {'Rainy': 0, 'Sunny': 1, 'Cloudy': 2, 'Snowy': 3}[weather_type]
-    cloud_cover_val = {'overcast': 0, 'partly cloudy': 1, 'clear': 2, 'cloudy': 3}[cloud_cover]
-    season_val = {'Winter': 0, 'Spring': 1, 'Autumn': 2, 'Summer': 3}[season]
-
-    # Prediction button logic
     if st.button("Get Weather Prediction"):
         try:
-            # Convert input fields to float
-            float_inputs = [
-                float(temperature),
-                float(humidity),
-                float(wind_speed),
-                float(precipitation),
-                float(pressure),
-                float(uv_index),
-                float(visibility)
+            # Convert all to float (or int, but float is safer for ML models)
+            input_list = [
+                float(temperature), float(humidity), float(wind_speed), float(precipitation),
+                float(pressure), float(uv_index), float(visibility),
+                float(season_val), float(location_val), float(weather_type_val), float(cloud_cover_val)
             ]
 
-            # Create final input list for prediction
-            input_list = float_inputs + [
-                int(season_val),
-                int(location_val),
-                int(weather_type_val),
-                int(cloud_cover_val)
-            ]
-
-            # Debug: show model input
+            # Debug view
             st.write("🔍 Input to model:", input_list)
 
-            # Predict using model
+            # Prediction
             prediction = w.predict([input_list])[0]
             diagnosis = f"✅ Weather prediction result: {prediction}"
 
         except Exception as e:
-            diagnosis = f"❌ Error: {e}"
+            st.error(f"❌ Error: {e}")
+        else:
+            st.success(diagnosis)
 
-        st.success(diagnosis)
-
-# Run the app
 if __name__ == "__main__":
     main()
